@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esquiva Corazones - Undertale Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            color: white;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            cursor: none;
+        }
+        
+        #title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            z-index: 100;
+        }
+        
+        #mode-selector {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            border: 2px solid #ff0055;
+        }
+        
+        #mode-selector button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff0055, #b3003d);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+        }
+        
+        #mode-selector button:hover {
+            background: linear-gradient(135deg, #ff3385, #ff0055);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+        }
+        
+        #mode-selector button.active {
+            background: linear-gradient(135deg, #00ccff, #0077ff);
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.8);
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background-color: #0d0d1a;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.3);
+            border: 3px solid #ff0055;
+        }
+        
+        #heart {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background-color: #ff0055;
+            clip-path: polygon(
+                50% 15%,
+                70% 0%,
+                85% 20%,
+                100% 35%,
+                80% 50%,
+                100% 65%,
+                85% 80%,
+                70% 100%,
+                50% 85%,
+                30% 100%,
+                15% 80%,
+                0% 65%,
+                20% 50%,
+                0% 35%,
+                15% 20%,
+                30% 0%
+            );
+            transform: rotate(-45deg);
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.8);
+            transition: transform 0.1s;
+        }
+        
+        .obstacle {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 5;
+        }
+        
+        #score-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ff0055;
+            z-index: 100;
+        }
+        
+        #high-score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #00ccff;
+            z-index: 100;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ff0055;
+            font-size: 1rem;
+            z-index: 100;
+        }
+        
+        #custom-cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 200;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+        }
+        
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+        }
+        
+        #final-score {
+            font-size: 3rem;
+            color: #ff0055;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #ff0055;
+        }
+        
+        #high-score-game-over {
+            font-size: 2rem;
+            color: #00ccff;
+            text-shadow: 0 0 15px #00ccff;
+            margin-bottom: 30px;
+        }
+        
+        #restart-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ff0055, #b3003d);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+        }
+        
+        #restart-btn:hover {
+            background: linear-gradient(135deg, #ff3385, #ff0055);
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.8);
+        }
+        
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #ff0055;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">ESQUIVA CORAZONES</h1>
+    
+    <div id="mode-selector">
+        <button id="normal-mode" class="active">MODO NORMAL</button>
+        <button id="hard-mode">MODO DIFÍCIL</button>
+    </div>
+    
+    <div id="game-container">
+        <div id="heart"></div>
+        <div id="score-display">Puntuación: <span id="score">0</span></div>
+        <div id="high-score-display">Récord: <span id="high-score">0</span></div>
+        <div id="instructions">Mueve el ratón para esquivar los obstáculos</div>
+        <div id="game-over">
+            <h2 id="final-score">Puntuación: 0</h2>
+            <h3 id="high-score-game-over">Récord: 0</h3>
+            <button id="restart-btn">REINICIAR JUEGO</button>
+        </div>
+    </div>
+    
+    <div id="custom-cursor"></div>
+
+    <script>
+        // Elementos del juego
+        const heart = document.getElementById("heart");
+        const gameContainer = document.getElementById("game-container");
+        const scoreDisplay = document.getElementById("score");
+        const highScoreDisplay = document.getElementById("high-score");
+        const finalScoreDisplay = document.getElementById("final-score");
+        const highScoreGameOver = document.getElementById("high-score-game-over");
+        const gameOverScreen = document.getElementById("game-over");
+        const customCursor = document.getElementById("custom-cursor");
+        const restartBtn = document.getElementById("restart-btn");
+        const normalModeBtn = document.getElementById("normal-mode");
+        const hardModeBtn = document.getElementById("hard-mode");
+        
+        // Variables del juego
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        let heartX = 50;
+        let heartY = 50;
+        let obstacles = [];
+        let gameSpeed = 2;
+        let gameRunning = false;
+        let currentMode = "normal";
+        let animationId;
+        
+        // Inicializar el juego
+        function initGame() {
+            // Configurar eventos
+            gameContainer.addEventListener("mousemove", moveHeart);
+            document.addEventListener("mousemove", moveCursor);
+            restartBtn.addEventListener("click", restartGame);
+            normalModeBtn.addEventListener("click", () => setMode("normal"));
+            hardModeBtn.addEventListener("click", () => setMode("hard"));
+            
+            // Mostrar high score
+            highScoreDisplay.textContent = highScore;
+            highScoreGameOver.textContent = `Récord: ${highScore}`;
+            
+            // Posicionar corazón en el centro
+            heart.style.left = `calc(50% - 17.5px)`;
+            heart.style.top = `calc(50% - 17.5px)`;
+            
+            // Iniciar bucle del juego
+            gameRunning = true;
+            gameLoop();
+        }
+        
+        // Mover el corazón con el mouse
+        function moveHeart(e) {
+            if (!gameRunning) return;
+            
+            const rect = gameContainer.getBoundingClientRect();
+            heartX = ((e.clientX - rect.left) / rect.width) * 100;
+            heartY = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            // Limitar el corazón dentro del contenedor
+            heartX = Math.max(1.5, Math.min(heartX, 98.5));
+            heartY = Math.max(1.5, Math.min(heartY, 98.5));
+            
+            heart.style.left = `calc(${heartX}% - 17.5px)`;
+            heart.style.top = `calc(${heartY}% - 17.5px)`;
+        }
+        
+        // Mover el cursor personalizado
+        function moveCursor(e) {
+            customCursor.style.left = `${e.clientX}px`;
+            customCursor.style.top = `${e.clientY}px`;
+        }
+        
+        // Establecer modo de juego
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Actualizar botones activos
+            normalModeBtn.classList.toggle("active", mode === "normal");
+            hardModeBtn.classList.toggle("active", mode === "hard");
+            
+            // Reiniciar juego
+            restartGame();
+        }
+        
+        // Crear obstáculos según el modo
+        function createObstacle() {
+            if (!gameRunning) return;
+            
+            const obstacle = document.createElement("div");
+            obstacle.className = "obstacle";
+            gameContainer.appendChild(obstacle);
+            
+            // Tamaño aleatorio
+            const size = 15 + Math.random() * 20;
+            obstacle.style.width = `${size}px`;
+            obstacle.style.height = `${size}px`;
+            
+            // Color aleatorio
+            const colors = ["#ff5555", "#55aaff", "#ffcc55", "#55ffaa", "#ff55ff"];
+            obstacle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Configuración según modo
+            let x, y, vx, vy, behavior;
+            
+            if (currentMode === "normal") {
+                // Modo Normal: Caen desde arriba
+                x = Math.random() * 100;
+                y = -5;
+                vx = (Math.random() - 0.5) * 0.2; // Pequeño movimiento horizontal
+                vy = gameSpeed * 0.05;
+                behavior = "normal";
+            } else {
+                // Modo Difícil: Patrones impredecibles
+                const side = Math.floor(Math.random() * 4); // 0: arriba, 1: derecha, 2: abajo, 3: izquierda
+                if (side === 0) { // Arriba
+                    x = Math.random() * 100;
+                    y = -5;
+                } else if (side === 1) { // Derecha
+                    x = 105;
+                    y = Math.random() * 100;
+                } else if (side === 2) { // Abajo
+                    x = Math.random() * 100;
+                    y = 105;
+                } else { // Izquierda
+                    x = -5;
+                    y = Math.random() * 100;
+                }
+                
+                // Velocidad y comportamiento
+                const behaviorType = Math.floor(Math.random() * 4);
+                if (behaviorType === 0) {
+                    // Movimiento recto hacia el centro
+                    const targetX = 50 + (Math.random() - 0.5) * 30;
+                    const targetY = 50 + (Math.random() - 0.5) * 30;
+                    vx = (targetX - x) * 0.02 * (0.5 + Math.random() * 0.5);
+                    vy = (targetY - y) * 0.02 * (0.5 + Math.random() * 0.5);
+                    behavior = "target";
+                } else if (behaviorType === 1) {
+                    // Movimiento errático
+                    vx = (Math.random() - 0.5) * 0.2;
+                    vy = (Math.random() - 0.5) * 0.2;
+                    behavior = "erratic";
+                } else if (behaviorType === 2) {
+                    // Movimiento circular
+                    vx = (Math.random() - 0.5) * 0.15;
+                    vy = 0;
+                    behavior = "circular";
+                } else {
+                    // Movimiento de rebote
+                    vx = (Math.random() - 0.5) * 0.25;
+                    vy = (Math.random() - 0.5) * 0.25;
+                    behavior = "bounce";
+                }
+            }
+            
+            obstacles.push({
+                element: obstacle,
+                x: x,
+                y: y,
+                vx: vx,
+                vy: vy,
+                size: size,
+                behavior: behavior,
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 5
+            });
+        }
+        
+        // Actualizar posición de obstáculos
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obstacle = obstacles[i];
+                
+                // Actualizar posición
+                obstacle.x += obstacle.vx;
+                obstacle.y += obstacle.vy;
+                
+                // Comportamientos especiales en modo difícil
+                if (currentMode === "hard") {
+                    if (obstacle.behavior === "erratic") {
+                        // Cambio de dirección aleatorio
+                        if (Math.random() < 0.02) {
+                            obstacle.vx = (Math.random() - 0.5) * 0.2;
+                            obstacle.vy = (Math.random() - 0.5) * 0.2;
+                        }
+                    } else if (obstacle.behavior === "circular") {
+                        // Movimiento circular
+                        obstacle.vy = Math.sin(obstacle.x * 0.1) * 0.15;
+                    } else if (obstacle.behavior === "bounce") {
+                        // Rebote en bordes
+                        if (obstacle.x < 0 || obstacle.x > 100) obstacle.vx *= -1;
+                        if (obstacle.y < 0 || obstacle.y > 100) obstacle.vy *= -1;
+                    }
+                }
+                
+                // Rotación
+                obstacle.rotation += obstacle.rotationSpeed;
+                obstacle.element.style.transform = `rotate(${obstacle.rotation}deg)`;
+                
+                // Actualizar posición en pantalla
+                obstacle.element.style.left = `calc(${obstacle.x}% - ${obstacle.size/2}px)`;
+                obstacle.element.style.top = `calc(${obstacle.y}% - ${obstacle.size/2}px)`;
+                
+                // Detectar colisión con el corazón
+                if (checkCollision(obstacle)) {
+                    createParticles(obstacle.x, obstacle.y);
+                    obstacle.element.remove();
+                    obstacles.splice(i, 1);
+                    endGame();
+                    return;
+                }
+                
+                // Eliminar obstáculos que salen de la pantalla
+                if (obstacle.x < -10 || obstacle.x > 110 || obstacle.y < -10 || obstacle.y > 110) {
+                    obstacle.element.remove();
+                    obstacles.splice(i, 1);
+                    score++;
+                    scoreDisplay.textContent = score;
+                    
+                    // Aumentar dificultad cada 5 puntos
+                    if (score % 5 === 0) gameSpeed += 0.2;
+                }
+            }
+        }
+        
+        // Detectar colisión entre corazón y obstáculo
+        function checkCollision(obstacle) {
+            const heartRect = heart.getBoundingClientRect();
+            const obstacleRect = obstacle.element.getBoundingClientRect();
+            
+            // Calcular distancia entre centros
+            const heartCenterX = heartRect.left + heartRect.width / 2;
+            const heartCenterY = heartRect.top + heartRect.height / 2;
+            const obstacleCenterX = obstacleRect.left + obstacleRect.width / 2;
+            const obstacleCenterY = obstacleRect.top + obstacleRect.height / 2;
+            
+            const distanceX = heartCenterX - obstacleCenterX;
+            const distanceY = heartCenterY - obstacleCenterY;
+            const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+            
+            // Radio del corazón (aproximado)
+            const heartRadius = heartRect.width / 2;
+            const obstacleRadius = obstacleRect.width / 2;
+            
+            // Detectar colisión si la distancia es menor que la suma de los radios
+            return distance < heartRadius + obstacleRadius;
+        }
+        
+        // Crear partículas de explosión
+        function createParticles(x, y) {
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement("div");
+                particle.className = "particle";
+                gameContainer.appendChild(particle);
+                
+                const size = 4 + Math.random() * 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                
+                // Posición inicial
+                particle.style.left = `calc(${x}% - ${size/2}px)`;
+                particle.style.top = `calc(${y}% - ${size/2}px)`;
+                
+                // Movimiento
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                
+                // Animar partícula
+                let opacity = 1;
+                const particleInterval = setInterval(() => {
+                    x += vx;
+                    y += vy;
+                    opacity -= 0.03;
+                    
+                    particle.style.left = `calc(${x}% - ${size/2}px)`;
+                    particle.style.top = `calc(${y}% - ${size/2}px)`;
+                    particle.style.opacity = opacity;
+                    
+                    if (opacity <= 0) {
+                        clearInterval(particleInterval);
+                        particle.remove();
+                    }
+                }, 30);
+            }
+        }
+        
+        // Terminar el juego
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            
+            // Actualizar high score si es necesario
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore.toString());
+                highScoreDisplay.textContent = highScore;
+            }
+            
+            // Mostrar pantalla de fin de juego
+            finalScoreDisplay.textContent = `Puntuación: ${score}`;
+            highScoreGameOver.textContent = `Récord: ${highScore}`;
+            gameOverScreen.style.display = "flex";
+        }
+        
+        // Reiniciar el juego
+        function restartGame() {
+            // Eliminar todos los obstáculos
+            obstacles.forEach(obstacle => obstacle.element.remove());
+            obstacles = [];
+            
+            // Reiniciar puntuación
+            score = 0;
+            scoreDisplay.textContent = score;
+            gameSpeed = currentMode === "hard" ? 3 : 2;
+            
+            // Ocultar pantalla de fin de juego
+            gameOverScreen.style.display = "none";
+            
+            // Volver a posicionar el corazón en el centro
+            heartX = 50;
+            heartY = 50;
+            heart.style.left = `calc(50% - 17.5px)`;
+            heart.style.top = `calc(50% - 17.5px)`;
+            
+            // Reiniciar bucle del juego
+            gameRunning = true;
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Bucle principal del juego
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Crear nuevos obstáculos
+            if (Math.random() < 0.03) createObstacle();
+            
+            // Actualizar obstáculos
+            updateObstacles();
+            
+            // Continuar bucle
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Iniciar el juego cuando la página cargue
+        window.onload = initGame;
+    </script>
+    
+    <!-- Música de fondo -->
+    <audio id="bg-music" loop>
+        <source src="./music/Undertale - Papyrus Theme Song - Bonetrousle.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Configuración de la música de fondo
+        document.addEventListener('DOMContentLoaded', function() {
+            const music = document.getElementById('bg-music');
+            music.volume = 0.3; // Volumen al 30%
+            
+            // Intentar reproducir automáticamente
+            function tryAutoplay() {
+                const playPromise = music.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // Autoplay funcionó
+                    }).catch(error => {
+                        // Si falla el autoplay, esperar a interacción del usuario
+                        document.addEventListener('click', function startMusicOnClick() {
+                            music.play();
+                            document.removeEventListener('click', startMusicOnClick);
+                        }, { once: true });
+                    });
+                }
+            }
+            
+            // Esperar a que la página esté completamente cargada
+            window.addEventListener('load', tryAutoplay);
+        });
+    </script>
+</body>
+</html>

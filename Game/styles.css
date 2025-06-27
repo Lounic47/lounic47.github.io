@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: #111;
+    cursor: none;
+}
+
+#heart {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    clip-path: polygon(
+        50% 15%,
+        70% 0%,
+        85% 20%,
+        100% 35%,
+        80% 50%,
+        100% 65%,
+        85% 80%,
+        70% 100%,
+        50% 85%,
+        30% 100%,
+        15% 80%,
+        0% 65%,
+        20% 50%,
+        0% 35%,
+        15% 20%,
+        30% 0%
+    );
+    transform: rotate(-45deg);
+    z-index: 10;
+}
+
+.obstacle {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+#score {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+}
+
+/* ... (estilos anteriores) ... */
+
