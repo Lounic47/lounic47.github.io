@@ -4,6 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Añade el evento click
     boton.addEventListener('click', function() {
         // Redirige a la otra página
-        window.location.href = "../Game/index.html";        
+        window.location.href = "./indexgame.html";        
     });
 });

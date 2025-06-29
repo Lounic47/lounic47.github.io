@@ -107,7 +107,3 @@ function resetGame() {
     scoreDisplay.textContent = `Puntuación: 0`;
 }
 
-
-
-
-

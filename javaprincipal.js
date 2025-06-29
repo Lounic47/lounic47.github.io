@@ -15,6 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Añade el evento click
     boton.addEventListener('click', function() {
         // Redirige a la otra página
-        window.location.href = "./Troll/index.html";        
+        window.location.href = "./indextroll.html";        
     });
 });
